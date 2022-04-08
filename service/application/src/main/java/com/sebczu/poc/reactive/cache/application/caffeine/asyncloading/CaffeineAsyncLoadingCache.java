@@ -3,10 +3,15 @@ package com.sebczu.poc.reactive.cache.application.caffeine.asyncloading;
 import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
 
 @Slf4j
@@ -27,6 +32,9 @@ public class CaffeineAsyncLoadingCache<K, V> {
     caffeine = setupMaximumSize(caffeine, properties);
 
     cache = caffeine
+      .evictionListener(removeListener())
+      .removalListener(removeListener())
+      .executor(executor())
       .refreshAfterWrite(properties.getRefreshAfterWrite())
       .buildAsync(loader);
   }
@@ -41,6 +49,20 @@ public class CaffeineAsyncLoadingCache<K, V> {
     return Optional.ofNullable(properties.getMaximumSize())
       .map(caffeine::maximumSize)
       .orElse(caffeine);
+  }
+
+  private RemovalListener<K, V> removeListener() {
+    return (key, value, cause) -> {
+      log.info("remove {}", key);
+    };
+  }
+
+  private ExecutorService executor() {
+    ThreadFactory cacheThreadFactory = new ThreadFactoryBuilder()
+      .setNameFormat("cache-%d")
+      .build();
+
+    return Executors.newFixedThreadPool(5, cacheThreadFactory);
   }
 
   public Mono<V> get(K key) {

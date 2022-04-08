@@ -13,9 +13,7 @@ public class DataRepository {
   public Mono<String> fetch(Integer id) {
     return Mono.just(id)
       .delayElement(Duration.ofSeconds(4))
-      .doOnNext(i -> {
-        log.info("fetch id: {}", i);
-      })
+      .doOnNext(i -> log.info("fetched by id: {}", i))
       .map(i -> i + "_data");
   }
 

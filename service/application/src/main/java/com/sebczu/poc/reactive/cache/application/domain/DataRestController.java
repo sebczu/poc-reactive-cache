@@ -16,10 +16,16 @@ import reactor.core.publisher.Mono;
 public class DataRestController {
 
   private final CaffeineAsyncLoadingCache<Integer, String> dataCache;
+  private final DataRepository repository;
+
+  @GetMapping("/cache/{id}")
+  public Mono<String> dataCache(@PathVariable  int id) {
+    return dataCache.get(id);
+  }
 
   @GetMapping("/{id}")
   public Mono<String> data(@PathVariable  int id) {
-    return dataCache.get(id);
+    return repository.fetch(id);
   }
 
 }
