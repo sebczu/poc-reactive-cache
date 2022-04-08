@@ -10,8 +10,6 @@ public class BlockHoundExtension implements BeforeTestExecutionCallback {
 
   @Override
   public void beforeTestExecution(ExtensionContext extensionContext) {
-    BlockHound.install(builder -> {
-      log.info("BlockHound initialized");
-    });
+    BlockHound.install(builder -> log.info("BlockHound initialized"));
   }
 }

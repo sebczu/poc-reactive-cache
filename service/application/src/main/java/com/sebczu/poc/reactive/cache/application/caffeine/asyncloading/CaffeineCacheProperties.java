@@ -4,17 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import reactor.core.publisher.Mono;
 
-import java.util.function.Function;
+import java.time.Duration;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CaffeineAsyncLoadingCacheProperties<K, V> {
+public abstract class CaffeineCacheProperties {
 
   protected boolean enabled = true;
-  protected Function<K, Mono<V>> provider;
+  protected Duration refreshAfterWrite;
+  protected Integer initialCapacity;
+  protected Long maximumSize;
 
 }

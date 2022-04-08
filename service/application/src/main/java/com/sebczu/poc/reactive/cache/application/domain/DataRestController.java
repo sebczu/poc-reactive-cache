@@ -1,4 +1,4 @@
-package com.sebczu.poc.reactive.cache.application.caffeine;
+package com.sebczu.poc.reactive.cache.application.domain;
 
 import com.sebczu.poc.reactive.cache.application.caffeine.asyncloading.CaffeineAsyncLoadingCache;
 import lombok.RequiredArgsConstructor;
@@ -12,14 +12,14 @@ import reactor.core.publisher.Mono;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/caffeine")
-public class CaffeineRestController {
+@RequestMapping("/data")
+public class DataRestController {
 
-  private final CaffeineAsyncLoadingCache<Integer, String> asyncloadingCache;
+  private final CaffeineAsyncLoadingCache<Integer, String> dataCache;
 
-  @GetMapping("/asyncloading/{id}")
-  public Mono<String> asyncloading(@PathVariable  int id) {
-    return asyncloadingCache.get(id);
+  @GetMapping("/{id}")
+  public Mono<String> data(@PathVariable  int id) {
+    return dataCache.get(id);
   }
 
 }

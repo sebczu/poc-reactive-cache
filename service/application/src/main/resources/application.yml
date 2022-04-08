@@ -4,3 +4,8 @@ management:
       exposure:
         include: "*"
 
+data:
+  cache:
+    enabled: true
+    refresh-after-write: 20s
+    initial-capacity: 100

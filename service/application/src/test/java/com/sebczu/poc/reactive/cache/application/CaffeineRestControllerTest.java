@@ -10,7 +10,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @ExtendWith(BlockHoundExtension.class)
 public class CaffeineRestControllerTest {
 
-  private static final String URL = "/caffeine/asyncloading/1";
+  private static final String URL = "/data/1";
 
   @Autowired
   private WebTestClient webClient;

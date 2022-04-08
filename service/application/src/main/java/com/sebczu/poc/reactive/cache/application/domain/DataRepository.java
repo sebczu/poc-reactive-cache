@@ -1,4 +1,4 @@
-package com.sebczu.poc.reactive.cache.application.repository;
+package com.sebczu.poc.reactive.cache.application.domain;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
