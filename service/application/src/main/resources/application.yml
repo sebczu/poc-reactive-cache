@@ -6,6 +6,7 @@ management:
 
 data:
   cache:
+    name: custom
     enabled: true
     refresh-after-write: 20s
     initial-capacity: 100

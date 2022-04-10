@@ -13,6 +13,7 @@ import java.time.Duration;
 @NoArgsConstructor
 public abstract class CaffeineCacheProperties {
 
+  protected String name;
   protected boolean enabled = true;
   protected Duration refreshAfterWrite;
   protected Integer initialCapacity;

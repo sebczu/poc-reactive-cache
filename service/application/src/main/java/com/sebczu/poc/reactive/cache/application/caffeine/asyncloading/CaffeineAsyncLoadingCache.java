@@ -4,7 +4,10 @@ import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalListener;
+import com.github.benmanes.caffeine.cache.stats.StatsCounter;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.cache.CaffeineStatsCounter;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -13,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Slf4j
 public class CaffeineAsyncLoadingCache<K, V> {
@@ -21,7 +25,7 @@ public class CaffeineAsyncLoadingCache<K, V> {
   private final Function<K, Mono<V>> provider;
   private final boolean enabled;
 
-  public CaffeineAsyncLoadingCache(CaffeineCacheProperties properties, Function<K, Mono<V>> provider) {
+  CaffeineAsyncLoadingCache(CaffeineCacheProperties properties, Function<K, Mono<V>> provider, MeterRegistry registry) {
     this.enabled = properties.isEnabled();
     this.provider = provider;
 
@@ -32,11 +36,20 @@ public class CaffeineAsyncLoadingCache<K, V> {
     caffeine = setupMaximumSize(caffeine, properties);
 
     cache = caffeine
+      .recordStats(stats(properties, registry))
       .evictionListener(removeListener())
       .removalListener(removeListener())
       .executor(executor())
       .refreshAfterWrite(properties.getRefreshAfterWrite())
       .buildAsync(loader);
+  }
+
+  public Mono<V> get(K key) {
+    if (enabled) {
+      log.info("get from cache by key: {}", key);
+      return Mono.fromFuture(cache.get(key));
+    }
+    return provider.apply(key);
   }
 
   private Caffeine<K, V> setupInitialCapacity(Caffeine<K, V> caffeine, CaffeineCacheProperties properties) {
@@ -57,20 +70,16 @@ public class CaffeineAsyncLoadingCache<K, V> {
     };
   }
 
+  private Supplier<? extends StatsCounter> stats(CaffeineCacheProperties properties, MeterRegistry registry) {
+    return () -> new CaffeineStatsCounter(registry, properties.getName());
+  }
+
   private ExecutorService executor() {
     ThreadFactory cacheThreadFactory = new ThreadFactoryBuilder()
       .setNameFormat("cache-%d")
       .build();
 
     return Executors.newFixedThreadPool(5, cacheThreadFactory);
-  }
-
-  public Mono<V> get(K key) {
-    if (enabled) {
-      log.info("get from cache by key: {}", key);
-      return Mono.fromFuture(cache.get(key));
-    }
-    return provider.apply(key);
   }
 
 }
