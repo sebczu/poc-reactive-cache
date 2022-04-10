@@ -30,18 +30,21 @@ public class CaffeineAsyncLoadingCache<K, V> {
     this.provider = provider;
 
     AsyncCacheLoader<K, V> loader = (key, executor) -> provider.apply(key).toFuture();
+    CaffeineStatsCounter stats = new CaffeineStatsCounter(registry, properties.getName());
 
     Caffeine caffeine = Caffeine.newBuilder();
     caffeine = setupInitialCapacity(caffeine, properties);
     caffeine = setupMaximumSize(caffeine, properties);
 
     cache = caffeine
-      .recordStats(stats(properties, registry))
+      .recordStats(() -> stats)
       .evictionListener(removeListener())
       .removalListener(removeListener())
       .executor(executor())
       .refreshAfterWrite(properties.getRefreshAfterWrite())
       .buildAsync(loader);
+
+    stats.registerSizeMetric(cache.synchronous());
   }
 
   public Mono<V> get(K key) {
@@ -68,10 +71,6 @@ public class CaffeineAsyncLoadingCache<K, V> {
     return (key, value, cause) -> {
       log.info("remove {}", key);
     };
-  }
-
-  private Supplier<? extends StatsCounter> stats(CaffeineCacheProperties properties, MeterRegistry registry) {
-    return () -> new CaffeineStatsCounter(registry, properties.getName());
   }
 
   private ExecutorService executor() {
