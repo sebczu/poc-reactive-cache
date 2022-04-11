@@ -1,3 +1,3 @@
 spring:
   application:
-    name: elastic-tutorial
+    name: poc-reactive-cache
