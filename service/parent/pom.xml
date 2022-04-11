@@ -72,9 +72,9 @@
               <image>openjdk:17-alpine</image>
             </from>
             <to>
-              <image>sebczu/personal:elastic-tutorial-${project.version}</image>
+              <image>sebczu/personal:poc-reactive-cache-${project.version}</image>
               <tags>
-                <tag>elastic-tutorial-latest</tag>
+                <tag>poc-reactive-cache-latest</tag>
               </tags>
             </to>
             <container>
